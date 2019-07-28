@@ -1,0 +1,5 @@
+.vscode/
+.idea/
+
+lenet
+lenet_cpu
