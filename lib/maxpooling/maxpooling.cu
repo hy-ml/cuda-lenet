@@ -28,11 +28,11 @@ __host__ void maxpooling(float *input, int isize, int ichan, float *output, int 
 
 
 __global__ void maxpooling(float *input, int isize, int ichan, float *output,
-    int osize,  int ksize, int stride, int N) {
-  int ocol, orow, och, kcol, krow;
-  float max, tmp;
+      int osize,  int ksize, int stride, int N) {
+    int ocol, orow, och, kcol, krow;
+    float max, tmp;
 
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx < N) {
         och = idx / (osize * osize);
@@ -48,3 +48,4 @@ __global__ void maxpooling(float *input, int isize, int ichan, float *output,
             *(output+och*osize*osize+osize*orow+ocol) = max;
         }
     }
+  }

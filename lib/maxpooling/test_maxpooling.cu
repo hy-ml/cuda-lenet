@@ -39,8 +39,9 @@ int main(void)
     cudaMemcpy(data_d, data_h, iNBytes, cudaMemcpyHostToDevice);
 
     // Execute
-    maxpooling(data_h, irow, ich, out_h, orow, ksize, stride)
-    maxpooling <<< GRID, oN / GRID + 1 >>> (data_d, irow, ich, out_d, orow, ksize, oN)
+    maxpooling(data_h, irow, ich, out_h, orow, ksize, stride);
+    // maxpooling <<< GRID, oN / GRID + 1 >>> (data_d, irow, ich, out_d, orow, ksize, oN);
+    maxpooling <<< GRID, oN / GRID + 1 >>> (data_d, irow, ich, out_d, orow, ksize, stride, oN);
     cudaMemcpy(out_h_from_d, out_d, oN * sizeof(float), cudaMemcpyDeviceToHost);
 
     for (int i = 0; i < oN; i++) {
@@ -50,9 +51,9 @@ int main(void)
     printf("%d\n", oN);
 
     // Free
-    free(data_h); free(out_h); free(out_h_from_d); free(w_h); free(b_h);
+    free(data_h); free(out_h); free(out_h_from_d);
     // CUDA free
-    cudaFree(data_d), cudaFree(out_d), cudaFree(w_d), cudaFree(b_d);
+    cudaFree(data_d), cudaFree(out_d);
 
     printf("Success Test\n");
     return 0;
