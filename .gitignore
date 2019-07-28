@@ -3,3 +3,5 @@
 
 lenet
 lenet_cpu
+
+lib/*/test

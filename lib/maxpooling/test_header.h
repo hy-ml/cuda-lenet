@@ -1,0 +1,2 @@
+__host__ void maxpooling(float *input, int isize, int ichan, float *output, int osize, int ksize, int stride);
+__global__ void maxpooling(float *input, int isize, int ichan, float *output, int osize, int ksize, int stride, int N);
