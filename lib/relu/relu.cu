@@ -23,13 +23,12 @@ __global__ void relu(float *input, int isize, int ichan, int N) {
     int ocol, orow, och;
 
     if (idx < N) {
-        och = idx / (osize * osize);
-        orow = (idx % (osize * osize)) / osize;
-        ocol = (idx % (osize * osize)) % osize;
+        // output size == input size
+        och = idx / (isize * isize);
+        orow = (idx % (isize * isize)) / isize;
+        ocol = (idx % (isize * isize)) % isize;
 
-        for (ocol = 0; ocol < isize; ocol++) {
-            if (*(input + och * isize * isize + orow * isize + ocol) < 0.0)
-                *(input + och * isize * isize + orow * isize + ocol) = 0.0;
-        }
+        if (*(input + och * isize * isize + orow * isize + ocol) < 0.0)
+            *(input + och * isize * isize + orow * isize + ocol) = 0.0;
     }
 }
