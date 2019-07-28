@@ -16,3 +16,5 @@ __host__ void softmax(float *input, int isize);
 __host__ void show_result(float *softmax, char *path, int size);
 __host__ void norm_image(float *image, int size); 
 __host__ void show_image(float *normed_image, int xy_size);
+
+__global__ void convolution(float *input, int isize, int ichan, float *output, int osize, int ochan, float *weight, float *bias, int ksize, int stride, int N);

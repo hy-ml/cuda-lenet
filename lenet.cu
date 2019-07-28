@@ -62,6 +62,7 @@ int main() {
 	printf("/// LeNet ///\n\n");fflush(stdout);
   
 	printf("Memory allocation ...\n");fflush(stdout);
+	// CPU memory allocation
 	if ((image = (float *)malloc(sizeof(float)*IMAGE_SIZE)) == NULL ||
 		
 		(conv1_w = (float *)malloc(sizeof(float)*CONV1_W_SIZE)) == NULL ||
