@@ -52,7 +52,7 @@ int main(void)
     cudaMemcpy(b_d, b_h, oN*sizeof(float), cudaMemcpyHostToDevice);
 
     // Execute
-    classifier(data_h, iN, data_h, oN, w_h, b_h)
+    classifier(data_h, iN, data_h, oN, w_h, b_h);
     classifier <<< GRID, oN / GRID + 1 >>> (data_d, iN, data_d, oN, w_d, b_d, oN);
 
     cudaMemcpy(out_h_from_d, out_d, oN * sizeof(float), cudaMemcpyDeviceToHost);
