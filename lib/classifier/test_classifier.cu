@@ -8,7 +8,7 @@
 
 float get_rand()
 {
-    return (float)(rand() % 10) / 100;
+    return (float)(rand() % 10) / 10;
 }
 
 int main(void)
