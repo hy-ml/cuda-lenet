@@ -209,7 +209,7 @@ int main() {
 	relu <<< GRID, FC1_OUT_SIZE / GRID + 1 >>> (fc1_out, 1, 500, FC1_OUT_SIZE);
 
 	classifier <<< GRID, FC2_OUT_SIZE / GRID + 1 >>>
-		(fc1_out, 500, fc2_out, 10, fc2_w, fc2_b, FC2_OUT_SIZE);//FC2
+		(fc1_out_d, 500, fc2_out_d, 10, fc2_w, fc2_b_d, FC2_OUT_SIZE);//FC2
 
 	CUDA_SAFE_CALL( cudaMemcpy(fc2_out, fc2_out_d, FC2_OUT_SIZE* sizeof(float),
 			cudaMemcpyDeviceToHost));
