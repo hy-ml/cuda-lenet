@@ -119,25 +119,25 @@ int main() {
 
 	// Copy to GPU
 	printf("Copy memory to GPU ...\n");fflush(stdout);
-	CUDA_SAFE_CALL( cudaMemcpy(conv1_w_d, conv1_w, sizeof(float)*CONV1_W_SIZE),
-			cudaMemcopyHostToDevice);
-	CUDA_SAFE_CALL( cudaMemcpy(conv1_b_d, conv1_b, sizeof(float)*CONV1_B_SIZE),
-					cudaMemcopyHostToDevice);
+	CUDA_SAFE_CALL( cudaMemcpy(conv1_w_d, conv1_w, sizeof(float)*CONV1_W_SIZE,
+			cudaMemcopyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(conv1_b_d, conv1_b, sizeof(float)*CONV1_B_SIZE,
+					cudaMemcopyHostToDevice));
 
-	CUDA_SAFE_CALL( cudaMemcpy(conv2_w_d, conv2_w, sizeof(float)*CONV2_W_SIZE),
-					cudaMemcopyHostToDevice);
-	CUDA_SAFE_CALL( cudaMemcpy(conv2_b_d, conv2_b, sizeof(float)*CONV2_B_SIZE),
-					cudaMemcopyHostToDevice);
+	CUDA_SAFE_CALL( cudaMemcpy(conv2_w_d, conv2_w, sizeof(float)*CONV2_W_SIZE,
+					cudaMemcopyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(conv2_b_d, conv2_b, sizeof(float)*CONV2_B_SIZE,
+					cudaMemcopyHostToDevice));
 
-	CUDA_SAFE_CALL( cudaMemcpy(fc1_w_d, fc1_w, sizeof(float)*FC1_W_SIZE),
-					cudaMemcopyHostToDevice);
-	CUDA_SAFE_CALL( cudaMemcpy(fc1_b_d, fc1_b, sizeof(float)*FC1_B_SIZE),
-					cudaMemcopyHostToDevice);
+	CUDA_SAFE_CALL( cudaMemcpy(fc1_w_d, fc1_w, sizeof(float)*FC1_W_SIZE,
+					cudaMemcopyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(fc1_b_d, fc1_b, sizeof(float)*FC1_B_SIZE,
+					cudaMemcopyHostToDevice));
 
-	CUDA_SAFE_CALL( cudaMemcpy(fc2_w_d, fc2_w, sizeof(float)*FC2_W_SIZE),
-					cudaMemcopyHostToDevice);
-	CUDA_SAFE_CALL( cudaMemcpy(fc2_b_d, fc2_b, sizeof(float)*FC2_B_SIZE),
-					cudaMemcopyHostToDevice);
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_w_d, fc2_w, sizeof(float)*FC2_W_SIZE,
+					cudaMemcopyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_b_d, fc2_b, sizeof(float)*FC2_B_SIZE,
+					cudaMemcopyHostToDevice));
 
 	printf("Read params ...\n\n");fflush(stdout);
 
