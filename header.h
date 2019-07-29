@@ -24,4 +24,4 @@ __global__ void relu(float *input, int isize, int ichan, int N);
 __global__ void classifier(float *input, int isize, float *output, int osize,
         float *weight, float *bias, int N);
 __global__ void maxpooling(float *input, int isize, int ichan, float *output,
-        int osize,  int ksize, int stride, int N) {
+        int osize,  int ksize, int stride, int N);
