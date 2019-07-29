@@ -4,7 +4,7 @@
 #include "header.h"
 
 
-# define GRID 512
+# define GRID 1028
 
 #define IMAGEFILE "./txt/image1000/"
 #define CHECK_PARAMS 0
