@@ -210,9 +210,7 @@ int main() {
 
 	classifier <<< GRID, FC2_OUT_SIZE / GRID + 1 >>>
 		(fc1_out_d, 500, fc2_out_d, 10, fc2_w, fc2_b_d, FC2_OUT_SIZE);//FC2
-
-	CUDA_SAFE_CALL( cudaMemcpy(fc2_out, fc2_out_d, FC2_OUT_SIZE* sizeof(float),
-			cudaMemcpyDeviceToHost));
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_out, fc2_out_d, FC2_OUT_SIZE * sizeof(float), cudaMemcpyDeviceToHost));
 	softmax(fc2_out, 10);
 	cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
