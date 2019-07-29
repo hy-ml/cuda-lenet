@@ -98,46 +98,46 @@ int main() {
 	// Memory allocate GPU
 
 	//Read image data
-	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_w_d, sizeof(float)*CONV1_W_SIZE)));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_b_d, sizeof(float)*CONV1_B_SIZE)));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_out_d, sizeof(float)*CONV1_OUT_SIZE)));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&pool1_out_d, sizeof(float)*POOL1_OUT_SIZE)));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_w_d, sizeof(float)*CONV1_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_b_d, sizeof(float)*CONV1_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_out_d, sizeof(float)*CONV1_OUT_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&pool1_out_d, sizeof(float)*POOL1_OUT_SIZE));
 
-	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_w_d, sizeof(float)*CONV2_W_SIZE)));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_b_d, sizeof(float)*CONV2_B_SIZE)));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_out_d, sizeof(float)*CONV2_OUT_SIZE)));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&pool2_out_d, sizeof(float)*POOL2_OUT_SIZE)));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_w_d, sizeof(float)*CONV2_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_b_d, sizeof(float)*CONV2_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_out_d, sizeof(float)*CONV2_OUT_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&pool2_out_d, sizeof(float)*POOL2_OUT_SIZE));
 
-	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_w_d), sizeof(float)*FC1_W_SIZE));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_b_d), sizeof(float)*FC1_B_SIZE));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_out_d), sizeof(float)*FC1_OUT_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_w_d, sizeof(float)*FC1_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_b_d, sizeof(float)*FC1_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_out_d, sizeof(float)*FC1_OUT_SIZE));
 
-	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_w_d), sizeof(float)*FC2_W_SIZE));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_b_d), sizeof(float)*FC2_B_SIZE));
-	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_out_d), sizeof(float)*FC2_OUT_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_w_d, sizeof(float)*FC2_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_b_d, sizeof(float)*FC2_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_out_d, sizeof(float)*FC2_OUT_SIZE));
 	printf("\n");
 
 	// Copy to GPU
 	printf("Copy memory to GPU ...\n");fflush(stdout);
 	CUDA_SAFE_CALL( cudaMemcpy(conv1_w_d, conv1_w, sizeof(float)*CONV1_W_SIZE),
-			cudaMemcopyHostToDevice));
+			cudaMemcopyHostToDevice);
 	CUDA_SAFE_CALL( cudaMemcpy(conv1_b_d, conv1_b, sizeof(float)*CONV1_B_SIZE),
-					cudaMemcopyHostToDevice));
+					cudaMemcopyHostToDevice);
 
 	CUDA_SAFE_CALL( cudaMemcpy(conv2_w_d, conv2_w, sizeof(float)*CONV2_W_SIZE),
-					cudaMemcopyHostToDevice));
+					cudaMemcopyHostToDevice);
 	CUDA_SAFE_CALL( cudaMemcpy(conv2_b_d, conv2_b, sizeof(float)*CONV2_B_SIZE),
-					cudaMemcopyHostToDevice));
+					cudaMemcopyHostToDevice);
 
 	CUDA_SAFE_CALL( cudaMemcpy(fc1_w_d, fc1_w, sizeof(float)*FC1_W_SIZE),
-					cudaMemcopyHostToDevice));
+					cudaMemcopyHostToDevice);
 	CUDA_SAFE_CALL( cudaMemcpy(fc1_b_d, fc1_b, sizeof(float)*FC1_B_SIZE),
-					cudaMemcopyHostToDevice));
+					cudaMemcopyHostToDevice);
 
 	CUDA_SAFE_CALL( cudaMemcpy(fc2_w_d, fc2_w, sizeof(float)*FC2_W_SIZE),
-					cudaMemcopyHostToDevice));
+					cudaMemcopyHostToDevice);
 	CUDA_SAFE_CALL( cudaMemcpy(fc2_b_d, fc2_b, sizeof(float)*FC2_B_SIZE),
-					cudaMemcopyHostToDevice));
+					cudaMemcopyHostToDevice);
 
 	printf("Read params ...\n\n");fflush(stdout);
 
