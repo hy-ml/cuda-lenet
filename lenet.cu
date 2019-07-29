@@ -75,18 +75,18 @@ int main() {
 		
 		(conv1_w = (float *)malloc(sizeof(float)*CONV1_W_SIZE)) == NULL ||
 		(conv1_b = (float *)malloc(sizeof(float)*CONV1_B_SIZE)) == NULL ||
-		(conv1_out = (float *)malloc(sizeof(float)*CONV1_OUT_SIZE)) == NULL ||
-		(pool1_out = (float *)malloc(sizeof(float)*POOL1_OUT_SIZE)) == NULL ||
+		// (conv1_out = (float *)malloc(sizeof(float)*CONV1_OUT_SIZE)) == NULL ||
+		// (pool1_out = (float *)malloc(sizeof(float)*POOL1_OUT_SIZE)) == NULL ||
 
 	  
 		(conv2_w = (float *)malloc(sizeof(float)*CONV2_W_SIZE)) == NULL ||
 		(conv2_b = (float *)malloc(sizeof(float)*CONV2_B_SIZE)) == NULL ||
-		(conv2_out = (float *)malloc(sizeof(float)*CONV2_OUT_SIZE)) == NULL ||
-		(pool2_out = (float *)malloc(sizeof(float)*POOL2_OUT_SIZE)) == NULL ||
+		// (conv2_out = (float *)malloc(sizeof(float)*CONV2_OUT_SIZE)) == NULL ||
+		// (pool2_out = (float *)malloc(sizeof(float)*POOL2_OUT_SIZE)) == NULL ||
 
 		(fc1_w = (float *)malloc(sizeof(float)*FC1_W_SIZE)) == NULL ||
 		(fc1_b = (float *)malloc(sizeof(float)*FC1_B_SIZE)) == NULL ||
-		(fc1_out = (float *)malloc(sizeof(float)*FC1_OUT_SIZE)) == NULL ||
+		// (fc1_out = (float *)malloc(sizeof(float)*FC1_OUT_SIZE)) == NULL ||
 	  
 		(fc2_w = (float *)malloc(sizeof(float)*FC2_W_SIZE)) == NULL ||
 		(fc2_b = (float *)malloc(sizeof(float)*FC2_B_SIZE)) == NULL ||
