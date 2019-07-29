@@ -14,7 +14,6 @@ float get_rand()
 int main(void)
 {
     float *data_h, *data_d, *out_h, *out_d, *out_h_from_d;
-    int stride = 1;
     int iN = 128;
     int oN = 64;
     int iNBytes = iN * sizeof(float), oNBytes = oN * sizeof(float);
@@ -33,12 +32,12 @@ int main(void)
         data_h[i] = get_rand(); 
     }
 
-    for (int i = 0; i < och*ksize*ksize; i++) {
+    for (int i = 0; i < iN*oN; i++) {
         w_h[i] = get_rand();
     }
 
 
-    for (int i = 0; i < och; i++) {
+    for (int i = 0; i < oN; i++) {
         b_h[i] = get_rand();
     }
 
@@ -54,7 +53,7 @@ int main(void)
 
     // Execute
     classifier(data_h, iN, data_h, oN, w_h, b_h)
-    classifier <<< GRID, oN / GRID + 1 >>> (data_d, iN, data_d, oN, w_d, b_d, oN)
+    classifier <<< GRID, oN / GRID + 1 >>> (data_d, iN, data_d, oN, w_d, b_d, oN);
 
     cudaMemcpy(out_h_from_d, out_d, oN * sizeof(float), cudaMemcpyDeviceToHost);
 
