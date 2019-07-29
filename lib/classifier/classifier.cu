@@ -26,10 +26,11 @@ __global__ void classifier(float *input, int isize, float *output, int osize,
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int j;
 
-    *(output + idx) = 0.0;
-
-    for (j = 0; j < isize; j++) {
-        *(output+idx) += *(weight+idx*isize+j) * *(input+j);
+    if (idx < N) {
+        *(output + idx) = 0.0;
+        for (j = 0; j < isize; j++) {
+            *(output + idx) += *(weight + idx * isize + j) * *(input + j);
+        }
+        *(output + idx) += *(bias + idx);
     }
-    *(output+idx) += *(bias+idx);
 }
