@@ -4,7 +4,7 @@
 #include "header.h"
 
 
-# define GRID 1028
+# define GRID 128
 
 #define IMAGEFILE "./txt/image1000/"
 #define CHECK_PARAMS 0
@@ -195,6 +195,8 @@ int main() {
 	printf("Feed forward ...\n\n");fflush(stdout);
 
  	cudaEventRecord(start, 0);
+	CUDA_SAFE_CALL(cudaMemcpy(image_d, image, sizeof(float)*IMAGE_SIZE,
+					cudaMemcpyHostToDevice));
 	convolution <<< GRID, CONV1_OUT_SIZE / GRID + 1 >>>
 		(image_d, 28, 1, conv1_out_d, 24, 20, conv1_w_d, conv1_b_d, 5, 1, CONV1_OUT_SIZE);//CONV1
 	//my_tanh(conv1_out, 24, 20);
