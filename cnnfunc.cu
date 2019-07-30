@@ -318,8 +318,9 @@ void show_image(float *normed_image, int xy_size) {
 }
 
 // CUDA
+
 __global__ void convolution(float *input, int isize, int ichan, float *output,
-                            int osize, int ochan, float *weight, float *bias, int ksize, int stride, int N)
+        int osize, int ochan, float *weight, float *bias, int ksize, int stride, int N)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int och, orow, ocol;
@@ -337,7 +338,7 @@ __global__ void convolution(float *input, int isize, int ichan, float *output,
                     // output[och][ocol][orow] += weight[och][kch][kcol][krow] * input[kch][kcol + ocol*stride][krow + orow*stride];
                     // example : conv1_out[57] += conv1_w[i*11*11+j*11+k] * image[(227*4*1+4*2)+i*227*227+j*227+k];
                     *(output+och*osize*osize+orow*osize+ocol) += *(weight+och*ichan*ksize*ksize+kch*ksize*ksize+krow*ksize+kcol) *
-                                                                 *(input+kch*isize*isize+krow*isize+kcol+(orow*isize*stride+ocol*stride));
+                    *(input+kch*isize*isize+krow*isize+kcol+(orow*isize*stride+ocol*stride));
                 }
             }
         }

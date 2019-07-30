@@ -48,6 +48,7 @@ int main() {
 	char s[32];
 
 	float *image;
+	float *image_d;
 	float *conv1_w, *conv1_b;
 	float *conv1_w_d, *conv1_b_d, *conv1_out_d;
 	float *pool1_out_d;
@@ -98,6 +99,7 @@ int main() {
 	// Memory allocate GPU
 
 	//Read image data
+	CUDA_SAFE_CALL( cudaMalloc((void **)&image_d, sizeof(float)*IMAGE_SIZE));
 	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_w_d, sizeof(float)*CONV1_W_SIZE));
 	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_b_d, sizeof(float)*CONV1_B_SIZE));
 	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_out_d, sizeof(float)*CONV1_OUT_SIZE));
@@ -117,28 +119,6 @@ int main() {
 	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_out_d, sizeof(float)*FC2_OUT_SIZE));
 	printf("\n");
 
-	// Copy to GPU
-	printf("Copy memory to GPU ...\n");fflush(stdout);
-	CUDA_SAFE_CALL( cudaMemcpy(conv1_w_d, conv1_w, sizeof(float)*CONV1_W_SIZE,
-			cudaMemcpyHostToDevice));
-	CUDA_SAFE_CALL( cudaMemcpy(conv1_b_d, conv1_b, sizeof(float)*CONV1_B_SIZE,
-					cudaMemcpyHostToDevice));
-
-	CUDA_SAFE_CALL( cudaMemcpy(conv2_w_d, conv2_w, sizeof(float)*CONV2_W_SIZE,
-					cudaMemcpyHostToDevice));
-	CUDA_SAFE_CALL( cudaMemcpy(conv2_b_d, conv2_b, sizeof(float)*CONV2_B_SIZE,
-					cudaMemcpyHostToDevice));
-
-	CUDA_SAFE_CALL( cudaMemcpy(fc1_w_d, fc1_w, sizeof(float)*FC1_W_SIZE,
-					cudaMemcpyHostToDevice));
-	CUDA_SAFE_CALL( cudaMemcpy(fc1_b_d, fc1_b, sizeof(float)*FC1_B_SIZE,
-					cudaMemcpyHostToDevice));
-
-	CUDA_SAFE_CALL( cudaMemcpy(fc2_w_d, fc2_w, sizeof(float)*FC2_W_SIZE,
-					cudaMemcpyHostToDevice));
-	CUDA_SAFE_CALL( cudaMemcpy(fc2_b_d, fc2_b, sizeof(float)*FC2_B_SIZE,
-					cudaMemcpyHostToDevice));
-
 	printf("Read params ...\n\n");fflush(stdout);
 
 
@@ -148,6 +128,8 @@ int main() {
 
 	read_params(imagefile, image, IMAGE_SIZE);
 	norm_image(image, IMAGE_SIZE);
+	CUDA_SAFE_CALL(cudaMemcpy(image_d, image, sizeof(float)*IMAGE_SIZE,
+					cudaMemcpyHostToDevice));
 	
 //show iamge
 	for (i = 0; i < 28; i++) {
@@ -186,12 +168,35 @@ int main() {
 
 	printf("\n");
 
+	// Copy to GPU
+	printf("Copy memory to GPU ...\n");fflush(stdout);
+	CUDA_SAFE_CALL( cudaMemcpy(conv1_w_d, conv1_w, sizeof(float)*CONV1_W_SIZE,
+			cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(conv1_b_d, conv1_b, sizeof(float)*CONV1_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+	CUDA_SAFE_CALL( cudaMemcpy(conv2_w_d, conv2_w, sizeof(float)*CONV2_W_SIZE,
+					cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(conv2_b_d, conv2_b, sizeof(float)*CONV2_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+	CUDA_SAFE_CALL( cudaMemcpy(fc1_w_d, fc1_w, sizeof(float)*FC1_W_SIZE,
+					cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(fc1_b_d, fc1_b, sizeof(float)*FC1_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_w_d, fc2_w, sizeof(float)*FC2_W_SIZE,
+					cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_b_d, fc2_b, sizeof(float)*FC2_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+
 	//FEED-FORWARD
 	printf("Feed forward ...\n\n");fflush(stdout);
 
  	cudaEventRecord(start, 0);
 	convolution <<< GRID, CONV1_OUT_SIZE / GRID + 1 >>>
-		(image, 28, 1, conv1_out_d, 24, 20, conv1_w_d, conv1_b_d, 5, 1, CONV1_OUT_SIZE);//CONV1
+		(image_d, 28, 1, conv1_out_d, 24, 20, conv1_w_d, conv1_b_d, 5, 1, CONV1_OUT_SIZE);//CONV1
 	//my_tanh(conv1_out, 24, 20);
 
 	maxpooling <<< GRID, POOL1_OUT_SIZE / GRID + 1 >>>
@@ -206,10 +211,10 @@ int main() {
 
     classifier <<< GRID, FC1_OUT_SIZE / GRID + 1 >>>
     	(pool2_out_d, 800, fc1_out_d, 500, fc1_w_d, fc1_b_d, FC1_OUT_SIZE);//FC1
-	relu <<< GRID, FC1_OUT_SIZE / GRID + 1 >>> (fc1_out, 1, 500, FC1_OUT_SIZE);
+	relu <<< GRID, FC1_OUT_SIZE / GRID + 1 >>> (fc1_out_d, 1, 500, FC1_OUT_SIZE);
 
 	classifier <<< GRID, FC2_OUT_SIZE / GRID + 1 >>>
-		(fc1_out_d, 500, fc2_out_d, 10, fc2_w, fc2_b_d, FC2_OUT_SIZE);//FC2
+		(fc1_out_d, 500, fc2_out_d, 10, fc2_w_d, fc2_b_d, FC2_OUT_SIZE);//FC2
 	CUDA_SAFE_CALL( cudaMemcpy(fc2_out, fc2_out_d, FC2_OUT_SIZE * sizeof(float),
 			cudaMemcpyDeviceToHost));
 	softmax(fc2_out, 10);
@@ -217,7 +222,7 @@ int main() {
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsed_time, start, stop);
 
-	printf("CPU: time = %f [msec]\n", elapsed_time);
+	printf("GPU: time = %f [msec]\n", elapsed_time);
 
 	print_all_params(fc2_out, 10);//result
 	

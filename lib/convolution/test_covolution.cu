@@ -61,10 +61,10 @@ int main(void)
 
     cudaMemcpy(out_h_from_d, out_d, oN * sizeof(float), cudaMemcpyDeviceToHost);
 
-    for (int i = 0; i < oN; i++) {
-        printf("i: %d, CPU: %3.3f, GPU: %3.3f\n", i, out_h[i], out_h_from_d[i]);
-        assert(abs(out_h[i] - out_h_from_d[i]) < 0.001);
-    }
+    // for (int i = 0; i < oN; i++) {
+    //     printf("i: %d, CPU: %3.3f, GPU: %3.3f\n", i, out_h[i], out_h_from_d[i]);
+    //     assert(abs(out_h[i] - out_h_from_d[i]) < 0.001);
+    // }
     printf("%d\n", oN);
 
     // Free 
