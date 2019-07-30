@@ -316,3 +316,84 @@ void show_image(float *normed_image, int xy_size) {
 		printf ("\n");
 	}
 }
+
+// CUDA
+
+__global__ void convolution(float *input, int isize, int ichan, float *output,
+        int osize, int ochan, float *weight, float *bias, int ksize, int stride, int N)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int och, orow, ocol;
+    int kch, kcol, krow;
+
+    if (idx < N) {
+        och = idx / (osize * osize);
+        orow = (idx % (osize * osize)) / osize;
+        ocol = (idx % (osize * osize)) % osize;
+        // printf("%d, %d, %d\n", och, orow, ocol);
+        *(output+och*osize*osize+orow*osize+ocol) = 0.0;
+        for (krow = 0; krow < ksize; krow++) {
+            for (kcol = 0; kcol < ksize; kcol++) {
+                for (kch = 0; kch < ichan; kch++) {
+                    // output[och][ocol][orow] += weight[och][kch][kcol][krow] * input[kch][kcol + ocol*stride][krow + orow*stride];
+                    // example : conv1_out[57] += conv1_w[i*11*11+j*11+k] * image[(227*4*1+4*2)+i*227*227+j*227+k];
+                    *(output+och*osize*osize+orow*osize+ocol) += *(weight+och*ichan*ksize*ksize+kch*ksize*ksize+krow*ksize+kcol) *
+                    *(input+kch*isize*isize+krow*isize+kcol+(orow*isize*stride+ocol*stride));
+                }
+            }
+        }
+        *(output+och*osize*osize+orow*osize+ocol) += *(bias+och);
+    }
+}
+
+__global__ void relu(float *input, int isize, int ichan, int N) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int ocol, orow, och;
+
+    if (idx < N) {
+        // output size == input size
+        och = idx / (isize * isize);
+        orow = (idx % (isize * isize)) / isize;
+        ocol = (idx % (isize * isize)) % isize;
+
+        if (*(input + och * isize * isize + orow * isize + ocol) < 0.0)
+            *(input + och * isize * isize + orow * isize + ocol) = 0.0;
+    }
+}
+
+__global__ void maxpooling(float *input, int isize, int ichan, float *output,
+                           int osize,  int ksize, int stride, int N) {
+    int ocol, orow, och, kcol, krow;
+    float max, tmp;
+
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx < N) {
+        och = idx / (osize * osize);
+        orow = (idx % (osize * osize)) / osize;
+        ocol = (idx % (osize * osize)) % osize;
+        max = -256.0;
+        for (krow = 0; krow < ksize; krow++) {
+            for (kcol = 0; kcol < ksize; kcol++) {
+                tmp = *(input+och*isize*isize+krow*isize+kcol+(orow*isize*stride+ocol*stride));
+                //tmp = input[och][orow+krow][ocol+kcol];
+                if (max < tmp) max = tmp;
+            }
+            *(output+och*osize*osize+osize*orow+ocol) = max;
+        }
+    }
+}
+
+__global__ void classifier(float *input, int isize, float *output, int osize,
+                           float *weight, float *bias, int N) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int j;
+
+    if (idx < N) {
+        *(output + idx) = 0.0;
+        for (j = 0; j < isize; j++) {
+            *(output + idx) += *(weight + idx * isize + j) * *(input + j);
+        }
+        *(output + idx) += *(bias + idx);
+    }
+}

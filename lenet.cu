@@ -3,6 +3,9 @@
 #include <math.h>
 #include "header.h"
 
+
+# define GRID 1028
+
 #define IMAGEFILE "./txt/image1000/"
 #define CHECK_PARAMS 0
 
@@ -28,6 +31,7 @@
 #define FC2_B_SIZE 10
 #define FC2_OUT_SIZE 10
 
+
 #define CUDA_SAFE_CALL(func) \
 	do { \
 		cudaError_t err = (func); \
@@ -44,14 +48,19 @@ int main() {
 	char s[32];
 
 	float *image;
-	float *conv1_w, *conv1_b, *conv1_out;
-	float *pool1_out;
+	float *image_d;
+	float *conv1_w, *conv1_b;
+	float *conv1_w_d, *conv1_b_d, *conv1_out_d;
+	float *pool1_out_d;
   
-	float *conv2_w, *conv2_b, *conv2_out;
-	float *pool2_out;
+	float *conv2_w, *conv2_b;
+	float *conv2_w_d, *conv2_b_d, *conv2_out_d;
+	float *pool2_out_d;
 
 	float *fc1_w, *fc1_b, *fc1_out;
+	float *fc1_w_d, *fc1_b_d, *fc1_out_d;
 	float *fc2_w, *fc2_b, *fc2_out;
+	float *fc2_w_d, *fc2_b_d, *fc2_out_d;
 
 	cudaEvent_t start, stop;
 	float elapsed_time;
@@ -67,18 +76,18 @@ int main() {
 		
 		(conv1_w = (float *)malloc(sizeof(float)*CONV1_W_SIZE)) == NULL ||
 		(conv1_b = (float *)malloc(sizeof(float)*CONV1_B_SIZE)) == NULL ||
-		(conv1_out = (float *)malloc(sizeof(float)*CONV1_OUT_SIZE)) == NULL ||
-		(pool1_out = (float *)malloc(sizeof(float)*POOL1_OUT_SIZE)) == NULL ||
+		// (conv1_out = (float *)malloc(sizeof(float)*CONV1_OUT_SIZE)) == NULL ||
+		// (pool1_out = (float *)malloc(sizeof(float)*POOL1_OUT_SIZE)) == NULL ||
 
 	  
 		(conv2_w = (float *)malloc(sizeof(float)*CONV2_W_SIZE)) == NULL ||
 		(conv2_b = (float *)malloc(sizeof(float)*CONV2_B_SIZE)) == NULL ||
-		(conv2_out = (float *)malloc(sizeof(float)*CONV2_OUT_SIZE)) == NULL ||
-		(pool2_out = (float *)malloc(sizeof(float)*POOL2_OUT_SIZE)) == NULL ||
+		// (conv2_out = (float *)malloc(sizeof(float)*CONV2_OUT_SIZE)) == NULL ||
+		// (pool2_out = (float *)malloc(sizeof(float)*POOL2_OUT_SIZE)) == NULL ||
 
 		(fc1_w = (float *)malloc(sizeof(float)*FC1_W_SIZE)) == NULL ||
 		(fc1_b = (float *)malloc(sizeof(float)*FC1_B_SIZE)) == NULL ||
-		(fc1_out = (float *)malloc(sizeof(float)*FC1_OUT_SIZE)) == NULL ||
+		// (fc1_out = (float *)malloc(sizeof(float)*FC1_OUT_SIZE)) == NULL ||
 	  
 		(fc2_w = (float *)malloc(sizeof(float)*FC2_W_SIZE)) == NULL ||
 		(fc2_b = (float *)malloc(sizeof(float)*FC2_B_SIZE)) == NULL ||
@@ -87,10 +96,31 @@ int main() {
 		printf("MemError\n");
 		exit(1);
 	}
+	// Memory allocate GPU
+
+	//Read image data
+	CUDA_SAFE_CALL( cudaMalloc((void **)&image_d, sizeof(float)*IMAGE_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_w_d, sizeof(float)*CONV1_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_b_d, sizeof(float)*CONV1_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv1_out_d, sizeof(float)*CONV1_OUT_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&pool1_out_d, sizeof(float)*POOL1_OUT_SIZE));
+
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_w_d, sizeof(float)*CONV2_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_b_d, sizeof(float)*CONV2_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&conv2_out_d, sizeof(float)*CONV2_OUT_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&pool2_out_d, sizeof(float)*POOL2_OUT_SIZE));
+
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_w_d, sizeof(float)*FC1_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_b_d, sizeof(float)*FC1_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc1_out_d, sizeof(float)*FC1_OUT_SIZE));
+
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_w_d, sizeof(float)*FC2_W_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_b_d, sizeof(float)*FC2_B_SIZE));
+	CUDA_SAFE_CALL( cudaMalloc((void **)&fc2_out_d, sizeof(float)*FC2_OUT_SIZE));
 	printf("\n");
 
 	printf("Read params ...\n\n");fflush(stdout);
-	//Read image data
+
 
  while(1) {
 	sprintf(imagefile, "%simage%03d.txt", IMAGEFILE, cnt);
@@ -98,6 +128,8 @@ int main() {
 
 	read_params(imagefile, image, IMAGE_SIZE);
 	norm_image(image, IMAGE_SIZE);
+	CUDA_SAFE_CALL(cudaMemcpy(image_d, image, sizeof(float)*IMAGE_SIZE,
+					cudaMemcpyHostToDevice));
 	
 //show iamge
 	for (i = 0; i < 28; i++) {
@@ -136,30 +168,61 @@ int main() {
 
 	printf("\n");
 
+	// Copy to GPU
+	printf("Copy memory to GPU ...\n");fflush(stdout);
+	CUDA_SAFE_CALL( cudaMemcpy(conv1_w_d, conv1_w, sizeof(float)*CONV1_W_SIZE,
+			cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(conv1_b_d, conv1_b, sizeof(float)*CONV1_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+	CUDA_SAFE_CALL( cudaMemcpy(conv2_w_d, conv2_w, sizeof(float)*CONV2_W_SIZE,
+					cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(conv2_b_d, conv2_b, sizeof(float)*CONV2_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+	CUDA_SAFE_CALL( cudaMemcpy(fc1_w_d, fc1_w, sizeof(float)*FC1_W_SIZE,
+					cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(fc1_b_d, fc1_b, sizeof(float)*FC1_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_w_d, fc2_w, sizeof(float)*FC2_W_SIZE,
+					cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_b_d, fc2_b, sizeof(float)*FC2_B_SIZE,
+					cudaMemcpyHostToDevice));
+
+
 	//FEED-FORWARD
 	printf("Feed forward ...\n\n");fflush(stdout);
 
  	cudaEventRecord(start, 0);
-	convolution(image, 28, 1, conv1_out, 24, 20, conv1_w, conv1_b, 5, 1);//CONV1
+	convolution <<< GRID, CONV1_OUT_SIZE / GRID + 1 >>>
+		(image_d, 28, 1, conv1_out_d, 24, 20, conv1_w_d, conv1_b_d, 5, 1, CONV1_OUT_SIZE);//CONV1
 	//my_tanh(conv1_out, 24, 20);
 
-	maxpooling(conv1_out, 24, 20, pool1_out, 12, 2, 2);//POOL1
+	maxpooling <<< GRID, POOL1_OUT_SIZE / GRID + 1 >>>
+		(conv1_out_d, 24, 20, pool1_out_d, 12, 2, 2, POOL1_OUT_SIZE);//POOL1
 
-	convolution(pool1_out, 12, 20, conv2_out, 8, 50, conv2_w, conv2_b, 5, 1);//CONV2
+	convolution <<< GRID, CONV2_OUT_SIZE / GRID + 1 >>>
+		(pool1_out_d, 12, 20, conv2_out_d, 8, 50, conv2_w_d, conv2_b_d, 5, 1, CONV2_OUT_SIZE);//CONV2
 	//my_tanh(conv2_out, 8, 50);
   
-	maxpooling(conv2_out, 8, 50, pool2_out, 4, 2, 2);//POOL2
+	maxpooling <<< GRID, POOL2_OUT_SIZE / GRID + 1 >>>
+		(conv2_out_d, 8, 50, pool2_out_d, 4, 2, 2, POOL2_OUT_SIZE);//POOL2
 
-    classifier(pool2_out, 800, fc1_out, 500, fc1_w, fc1_b);//FC1
-	relu(fc1_out, 1, 500);
+    classifier <<< GRID, FC1_OUT_SIZE / GRID + 1 >>>
+    	(pool2_out_d, 800, fc1_out_d, 500, fc1_w_d, fc1_b_d, FC1_OUT_SIZE);//FC1
+	relu <<< GRID, FC1_OUT_SIZE / GRID + 1 >>> (fc1_out_d, 1, 500, FC1_OUT_SIZE);
 
-	classifier(fc1_out, 500, fc2_out, 10, fc2_w, fc2_b);//FC2
+	classifier <<< GRID, FC2_OUT_SIZE / GRID + 1 >>>
+		(fc1_out_d, 500, fc2_out_d, 10, fc2_w_d, fc2_b_d, FC2_OUT_SIZE);//FC2
+	CUDA_SAFE_CALL( cudaMemcpy(fc2_out, fc2_out_d, FC2_OUT_SIZE * sizeof(float),
+			cudaMemcpyDeviceToHost));
 	softmax(fc2_out, 10);
 	cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsed_time, start, stop);
 
-	printf("CPU: time = %f [msec]\n", elapsed_time);
+	printf("GPU: time = %f [msec]\n", elapsed_time);
 
 	print_all_params(fc2_out, 10);//result
 	

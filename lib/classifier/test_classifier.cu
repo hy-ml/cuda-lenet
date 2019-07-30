@@ -8,18 +8,14 @@
 
 float get_rand()
 {
-    return (float)(rand() % 10) / 100;
+    return (float)(rand() % 10) / 10;
 }
 
 int main(void)
 {
     float *data_h, *data_d, *out_h, *out_d, *out_h_from_d;
-    int stride = 1;
-    int irow = 28, icol = 28, ich = 1;
-    int ksize = 5;
-    int orow = 24, ocol = 24, och = 5;
-    int iN = ich * irow * icol;
-    int oN = och * orow * ocol;
+    int iN = 128;
+    int oN = 64;
     int iNBytes = iN * sizeof(float), oNBytes = oN * sizeof(float);
 
     float *w_h, *w_d, *b_h, *b_d;
@@ -28,43 +24,43 @@ int main(void)
     data_h = (float *)malloc(iNBytes);
     out_h = (float *)malloc(oNBytes);
     out_h_from_d = (float *)malloc(oNBytes);
-    w_h = (float*)malloc(ksize*ksize*och*sizeof(float));
-    b_h = (float*)malloc(och * sizeof(float));
+    w_h = (float*)malloc(iN*oN*sizeof(float));
+    b_h = (float*)malloc(oN*sizeof(float));
 
     // Initialize
     for (int i = 0; i < iN; i++) {
         data_h[i] = get_rand(); 
     }
 
-    for (int i = 0; i < och*ksize*ksize; i++) {
+    for (int i = 0; i < iN*oN; i++) {
         w_h[i] = get_rand();
     }
 
 
-    for (int i = 0; i < och; i++) {
+    for (int i = 0; i < oN; i++) {
         b_h[i] = get_rand();
     }
 
     // CUDA memory allocate
     cudaMalloc((void **)&data_d, iNBytes);
     cudaMalloc((void **)&out_d, oNBytes);
-    cudaMalloc((void **)&w_d, ksize*ksize*och*sizeof(float));
-    cudaMalloc((void **)&b_d, och*sizeof(float));
+    cudaMalloc((void **)&w_d, iN*oN*sizeof(float));
+    cudaMalloc((void **)&b_d, oN*sizeof(float));
 
     cudaMemcpy(data_d, data_h, iNBytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(w_d, w_h, och*ksize*ksize*sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(b_d, b_h, och*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(w_d, w_h, iN*oN*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(b_d, b_h, oN*sizeof(float), cudaMemcpyHostToDevice);
 
     // Execute
-    convolution(data_h, irow, ich, out_h, orow, och, w_h, b_h, ksize, stride);
-    convolution <<< GRID, oN / GRID + 1 >>> (data_d, irow, ich, out_d, orow, och, w_d, b_d, ksize, stride, oN);
+    classifier(data_h, iN, out_h, oN, w_h, b_h);
+    classifier <<< GRID, oN / GRID + 1 >>> (data_d, iN, out_d, oN, w_d, b_d, oN);
 
     cudaMemcpy(out_h_from_d, out_d, oN * sizeof(float), cudaMemcpyDeviceToHost);
 
-    // for (int i = 0; i < oN; i++) {
-    //     printf("i: %d, CPU: %3.3f, GPU: %3.3f\n", i, out_h[i], out_h_from_d[i]);
-    //     assert(abs(out_h[i] - out_h_from_d[i]) < 0.001);
-    // }
+    for (int i = 0; i < oN; i++) {
+        printf("i: %d, CPU: %3.3f, GPU: %3.3f\n", i, out_h[i], out_h_from_d[i]);
+        assert(abs(out_h[i] - out_h_from_d[i]) < 0.001);
+    }
     printf("%d\n", oN);
 
     // Free 

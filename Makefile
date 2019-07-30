@@ -1,3 +1,3 @@
-lenet: lenet.cu cnnfunc.cu lib/convolution/convolution.cu
-	nvcc lenet.cu cnnfunc.cu -o lenet
-	nvcc lenet_cpu.cu cnnfunc.cu -o lenet_cpu
+lenet: lenet.cu cnnfunc.cu
+	nvcc lenet.cu cnnfunc.cu -lineinfo -o lenet
+	nvcc lenet_cpu.cu cnnfunc.cu -lineinfo -o lenet_cpu
