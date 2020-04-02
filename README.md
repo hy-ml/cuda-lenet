@@ -1,6 +1,6 @@
 # CUDA implementation of LeNet
 
-These codes was implemented in 2019 class assginment in Special Course on Computer Architectures in Keio University.
+These codes was implemented in 2019 class assginments in Special Course on Computer Architectures in Keio University.
 http://www.am.ics.keio.ac.jp/comparc/
 
 ## Hot to use.
