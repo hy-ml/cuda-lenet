@@ -1,4 +1,4 @@
-# CUDA implementation of LeNe
+# CUDA implementation of LeNet
 
 These codes was implemented in 2019 class assginment in Special Course on Computer Architectures in Keio University.
 http://www.am.ics.keio.ac.jp/comparc/
